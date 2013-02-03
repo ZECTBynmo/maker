@@ -1,11 +1,11 @@
 { 
-  "name": "amalgam",
-  "version": "0.0.5",
+  "name": "maker",
+  "version": "0.0.1",
   "author": "Mike Vegeto <michael.vegeto@gmail.com>",
   "description": "Generates files from various templates and inputs",
-  "main": "./amalgam",
+  "main": "./maker",
   "engines": { "node": ">=0.8.0" },
-  "keywords": [ "file", "generate", "template", "create", "source", "amalgam" ],
-  "licenses": [ { "type": "MIT", "url": "http://raw.github.com/ZECTBynmo/amalgam/master/LICENSE" } ],
-  "repository": { "type": "git", "url": "http://github.com/ZECTBynmo/amalgam.git" }
+  "keywords": [ "file", "generate", "template", "create", "source", "maker" ],
+  "licenses": [ { "type": "MIT", "url": "http://raw.github.com/ZECTBynmo/maker/master/LICENSE" } ],
+  "repository": { "type": "git", "url": "http://github.com/ZECTBynmo/maker.git" }
 }
