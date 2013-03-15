@@ -1,5 +1,6 @@
 var maker = require("./maker").createMaker( "~" );
 
-maker.loadTemplateDir( "D:/Projects/maker/templates", function( templates ) {
+maker.loadTemplateDir( "./templates", function( templates ) {
+	var templateObj = maker.template( templates["functionTemplate"] );
 	console.log( templates );
 });

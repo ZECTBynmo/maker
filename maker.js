@@ -45,8 +45,8 @@ function Maker( separationString ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Returns a template object loaded from a file
-Maker.prototype.loadTemplate = function( templateName, contents ) {
-	var templateObj = parseTemplateString( templateName, this.separationString );
+Maker.prototype.template = function( templateString, contents ) {
+	var templateObj = parseTemplate( templateString, this.separationString );
 
 	for( var property in contents ) {
 		if( contents.hasOwnProperty(property) ) {
@@ -56,7 +56,7 @@ Maker.prototype.loadTemplate = function( templateName, contents ) {
 	}
 
 	return templateObj;
-} // end loadTemplate()
+} // end template()
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Parses a template string and returns an object of its contents
-function parseTemplateString( templateString, separationString ) {
+function parseTemplate( templateString, separationString ) {
 	var iPosition = 0,
 		matches = [],
 		templateObj = {};
@@ -99,10 +99,10 @@ function parseTemplateString( templateString, separationString ) {
 	while( iPosition > 0 ) {
 		matches.push( iPosition + separationString.length );
 
-		iPosition = templateString.indexOf( separationString, iPosition );
+		iPosition = templateString.indexOf( separationString, iPosition+1 );
 	}
 
-	if( matches % 2 != 0 ) {
+	if( matches.length % 2 != 0 ) {
 		log( "Error while parsing template: Mismatched separation string" );
 	}
 
@@ -113,4 +113,4 @@ function parseTemplateString( templateString, separationString ) {
 	}
 
 	return templateObj;
-} // end parseTemplateString()
+} // end parseTemplate()
