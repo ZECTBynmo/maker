@@ -2,10 +2,11 @@ var fs = require('fs'),
 	basename = require('path').basename;
 
 var JSTemplateFiles = [
-	"./JS/functionTemplate.tpl",
+	"./templates/JS/functionTemplate.tpl",
 ];
 
-var JSTemplates = {};
+var JSTemplates = {},
+	templateFileExtension = ".tpl";
 
 for( var iFile=0; iFile < JSTemplateFiles.length; ++iFile ) {
 	var path = JSTemplateFiles[iFile],
@@ -14,7 +15,7 @@ for( var iFile=0; iFile < JSTemplateFiles.length; ++iFile ) {
 	var templateName = basename( path );
 
 	// Trim off the extension
-	templateName = templateName.substring( 0, templateName.length - 4 );
+	templateName = templateName.substring( 0, templateName.length - templateFileExtension.length );
 
 	JSTemplates[templateName] = file;
 }
