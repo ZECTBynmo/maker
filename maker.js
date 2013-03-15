@@ -28,36 +28,78 @@ var log = function( text, isImportant ) {
 	}
 };
 
+var wrench = require("wrench"),
+	basename = require("path").basename,
+	fs = require("fs");
+
+var templateFileExtension = ".tpl";
+
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
 function Maker( separationString ) {
-	this.separationString = separationString || "~";
+	this.separationString = separationString || "~~";
 	this.templates = require("./templates/templates");
-
 } // end Maker()
 
 
 //////////////////////////////////////////////////////////////////////////
-// 
-Maker.prototype.() {
+// Returns a template object loaded from a file
+Maker.prototype.loadTemplate = function( templateName, contents ) {
+	var templateObj = parseTemplateString( templateName, this.separationString );
 
-} // end ()
+	for( var property in contents ) {
+		if( contents.hasOwnProperty(property) ) {
+
+			templateObj[property] = contents[property] || {};
+		}
+	}
+
+	return templateObj;
+} // end loadTemplate()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Loads all templates inside of a given directory  
+Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
+	var templates = {};
+
+	// Walk the folder tree recursively
+	wrench.readdirRecursive( templateDir, function(error, files) {
+		if( files == null ) 
+			return callback( templates );
+
+		for( var iFile=0; iFile<files.length; ++iFile ) {
+			if( files[iFile].indexOf(".tpl") == -1 )
+				continue;
+
+			var path = templateDir + "/" + files[iFile],
+				file = fs.readFileSync( path, "utf8" );
+
+			var templateName = basename( path );
+
+			// Trim off the extension
+			templateName = templateName.substring( 0, templateName.length - templateFileExtension.length );
+
+			templates[templateName] = file;
+		}
+	});
+} // end loadTemplateDir()
 
 
 //////////////////////////////////////////////////////////////////////////
 // Parses a template string and returns an object of its contents
-function parseTemplateString( functionTemplate, separationString ) {
+function parseTemplateString( templateString, separationString ) {
 	var iPosition = 0,
 		matches = [],
 		templateObj = {};
 
-	iPosition = functionTemplate.indexOf( separationString, iPosition );
+	iPosition = templateString.indexOf( separationString, iPosition );
 
 	while( iPosition > 0 ) {
 		matches.push( iPosition + separationString.length );
 
-		iPosition = functionTemplate.indexOf( separationString, iPosition );
+		iPosition = templateString.indexOf( separationString, iPosition );
 	}
 
 	if( matches % 2 != 0 ) {
@@ -65,7 +107,7 @@ function parseTemplateString( functionTemplate, separationString ) {
 	}
 
 	for( var iItem = 0; iItem < matches.length; iItem += 2 ) {
-		var strItem = functionTemplate.substring( matches[iItem] + separationString.length, matches[iItem+1] );
+		var strItem = templateString.substring( matches[iItem] + separationString.length, matches[iItem+1] );
 		
 		templateObj[strItem] = {};
 	}
