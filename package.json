@@ -1,6 +1,6 @@
 {
   "name": "maker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Mike Vegeto <michael.vegeto@gmail.com>",
   "description": "Generates files from various templates and inputs",
   "main": "./maker",
@@ -26,6 +26,8 @@
     "url": "http://github.com/ZECTBynmo/maker.git"
   },
   "dependencies": {
-    "wrench": "~1.4.4"
+    "wrench": "~1.4.4",
+    "traverse": "~0.6.3",
+    "clone": "~0.1.6"
   }
 }
