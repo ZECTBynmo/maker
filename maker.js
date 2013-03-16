@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-// gyp-builder - Server Side
+// maker - Server Side
 //////////////////////////////////////////////////////////////////////////
 //
 // Main module for gyp-builder
@@ -30,7 +30,8 @@ var log = function( text, isImportant ) {
 
 var wrench = require("wrench"),
 	basename = require("path").basename,
-	fs = require("fs");
+	fs = require("fs"),
+	traverse = require("traverse");
 
 var templateFileExtension = ".tpl";
 
@@ -39,7 +40,7 @@ var templateFileExtension = ".tpl";
 // Constructor
 function Maker( separationString ) {
 	this.separationString = separationString || "~~";
-	this.templates = require("./templates/templates");
+	this.templates = {};
 } // end Maker()
 
 
@@ -60,14 +61,73 @@ Maker.prototype.template = function( templateString, contents ) {
 
 
 //////////////////////////////////////////////////////////////////////////
+// Creates a file on disk composed of the given templates
+Maker.prototype.makeFile = function( path, templates ) {
+	// Convert any templates that are still objects into strings
+	for( var iTemplate=0; iTemplate<templates.length; ++iTemplate ) {
+		if( typeof(templates[iTemplate]) === "object" ) {
+			templates[iTemplate] = this.renderTemplateToString( templates[iTemplate] );
+		}
+	}
+
+	var fileContents = "";
+
+	// Concatenate all template strings into one big string
+	for( var iTemplate=0; iTemplate<templates.length; ++iTemplate ) {
+		fileContents += templates[iTemplate];
+	}
+
+	// Write the file to disk
+	fs.writeFile( path, fileContents, function(err) {
+	    if(err) {
+	        console.log(err);
+	    } else {
+	        console.log("The file was saved!");
+	    }
+	}); 
+} // end makeFile()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Renders a template and its contents back into a string
+Maker.prototype.renderTemplateToString = function( template ) {
+	if( typeof(template) === "string" )
+		template = this.templates[template];
+
+
+	// Start with the original template string
+	var renderedTemplate = template.__fullTemplateString__,
+		matches = template.__templateMatches__;
+
+	for( var iItem in template ) {
+		if( iItem == "__fullTemplateString__" || iItem == "__templateMatches__" )
+			continue;
+
+		if( typeof template[iItem] === "object" ) {
+			console.log( "Parameter '" + iItem + "' has no value set" );
+		}
+
+		var stringToReplace = this.separationString + iItem + this.separationString;
+		renderedTemplate = renderedTemplate.replace( new RegExp(stringToReplace, "g"), template[iItem] );
+	}
+
+	return renderedTemplate;
+} // end renderTemplate()
+
+
+//////////////////////////////////////////////////////////////////////////
 // Loads all templates inside of a given directory  
 Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
+	var _this = this; 
 	var templates = {};
 
 	// Walk the folder tree recursively
 	wrench.readdirRecursive( templateDir, function(error, files) {
-		if( files == null ) 
+		if( files == null ) {
+			log( "Templates loaded from directory " + templateDir );
+			_this.templates = templates;
 			return callback( templates );
+		}
 
 		for( var iFile=0; iFile<files.length; ++iFile ) {
 			if( files[iFile].indexOf(".tpl") == -1 )
@@ -81,7 +141,7 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 			// Trim off the extension
 			templateName = templateName.substring( 0, templateName.length - templateFileExtension.length );
 
-			templates[templateName] = file;
+			templates[templateName] = _this.template( file );
 		}
 	});
 } // end loadTemplateDir()
@@ -97,7 +157,7 @@ function parseTemplate( templateString, separationString ) {
 	iPosition = templateString.indexOf( separationString, iPosition );
 
 	while( iPosition > 0 ) {
-		matches.push( iPosition + separationString.length );
+		matches.push( iPosition );
 
 		iPosition = templateString.indexOf( separationString, iPosition+1 );
 	}
@@ -111,6 +171,11 @@ function parseTemplate( templateString, separationString ) {
 		
 		templateObj[strItem] = {};
 	}
+
+	// Attach the original template string onto the parsed template object, so that
+	// we can reconstruct it later
+	templateObj.__fullTemplateString__= templateString;
+	templateObj.__templateMatches__ = matches;
 
 	return templateObj;
 } // end parseTemplate()
