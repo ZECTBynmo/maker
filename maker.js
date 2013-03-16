@@ -94,7 +94,6 @@ Maker.prototype.renderTemplateToString = function( template ) {
 	if( typeof(template) === "string" )
 		template = this.templates[template];
 
-
 	// Start with the original template string
 	var renderedTemplate = template.__fullTemplateString__,
 		matches = template.__templateMatches__;
@@ -104,7 +103,8 @@ Maker.prototype.renderTemplateToString = function( template ) {
 			continue;
 
 		if( typeof template[iItem] === "object" ) {
-			console.log( "Parameter '" + iItem + "' has no value set" );
+			// Render this template recursively
+			template[iItem] = this.renderTemplateToString( template[iItem] );
 		}
 
 		var stringToReplace = this.separationString + iItem + this.separationString;
