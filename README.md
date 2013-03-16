@@ -11,9 +11,9 @@ Here's an example template, lets say we save it as 'myTemplate.tpl'
 ```JavaScript
 //////////////////////////////////////////////////////////////////////////
 // ~~comment~~
-function ~~className~~( ~~arguments~~ ) {
+function ~~functionName~~( ~~arguments~~ ) {
 	~~contents~~
-} // end ~~className~~()
+} // end ~~functionName~~()
 ```
 The template is a copy of the code you're trying to output with the variables and custom names replaced with template strings. The default separation string is ~~, but it can be changed to anything by using the optional argument to the maker constructor.
 
@@ -23,7 +23,7 @@ var maker = require("maker").createMaker();
 
 maker.loadTemplateDir( "./templates", function( templates ) {
 	templates["myTemplate"].comment = "comment stuff";
-	templates["myTemplate"].className = "SomeClass";
+	templates["myTemplate"].functionName = "SomeFunction";
 	templates["myTemplate"].arguments = "";
 	templates["myTemplate"].contents = "console.log('test');";
 
@@ -38,4 +38,14 @@ maker.loadTemplateDir( "./templates", function( templates ) {
 	// Write the file
 	maker.makeFile( "./testOutput.js", fileTemplates );
 }
+```
+
+Ignoring the unspecified template 'myOtherTemplate', This script would render myTemplate.tpl as the following
+
+```JavaScript
+//////////////////////////////////////////////////////////////////////////
+// comment stuff
+function SomeFunction() {
+	console.log('test');
+} // end SomeFunction()
 ```
