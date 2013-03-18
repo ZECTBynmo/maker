@@ -16,7 +16,7 @@ maker.loadTemplateDir( "./templates", function( templates ) {
 
 	// Fill out our templates
 	constructorT.comment = "This is a test constructor";
-	constructorT.className = "";
+	constructorT.className = className;
 	constructorT.arguments = "woah, dude, sweet";
 	constructorT.contents = "this.log = console.log;";
 
