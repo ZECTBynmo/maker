@@ -113,7 +113,9 @@ Maker.prototype.renderTemplateToString = function( template ) {
 		if( typeof template[iItem] === "object" ) {
 			// Render this template recursively
 			template[iItem] = this.renderTemplateToString( template[iItem] );
-		}
+		} else if( typeof template[iItem] != "string" ) {
+			console.log( "Item '" + iItem + "' is not a string" );
+		} 
 
 		var stringToReplace = this.separationString + iItem + this.separationString;
 		renderedTemplate = renderedTemplate.replace( new RegExp(stringToReplace, "g"), template[iItem] );
