@@ -21,18 +21,25 @@ Here's a basic usage example
 ```JavaScript
 var maker = require("maker").createMaker();
 
+// Load all template files (.tpl) within some directory
 maker.loadTemplateDir( "./templates", function( templates ) {
-	templates["myTemplate"].comment = "comment stuff";
-	templates["myTemplate"].functionName = "SomeFunction";
-	templates["myTemplate"].arguments = "";
-	templates["myTemplate"].contents = "console.log('test');";
 
-	templates["myOtherTemplate"].someThing = "someOtherThing";
+	// Grab a copy of the templates we want to use
+	var myTemplate = maker.getTemplate( "myTemplate" ),
+		myOtherTemplate = maker.getTemplate( "myOtherTemplate" );
+
+	// Fill out our templates with contents
+	myTemplate.comment = "comment stuff";
+	myTemplate.functionName = "SomeFunction";
+	myTemplate.arguments = "";
+	myTemplate.contents = "console.log('test');";
+
+	myOtherTemplate.someThing = "someOtherThing";
 
 	// Create an array of templates in the order that 
 	// we want them to appear in the file
 	fileTemplates = [];
-	fileTemplates.push( templates["myTemplate"] );
+	fileTemplates.push( myTemplate );
 	fileTemplates.push( templates["myOtherTemplate"] );
 
 	// Write the file

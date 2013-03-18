@@ -31,6 +31,7 @@ var log = function( text, isImportant ) {
 var wrench = require("wrench"),
 	basename = require("path").basename,
 	fs = require("fs"),
+	clone = require("clone"),
 	traverse = require("traverse");
 
 var templateFileExtension = ".tpl";
@@ -58,6 +59,13 @@ Maker.prototype.template = function( templateString, contents ) {
 
 	return templateObj;
 } // end template()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Returns a template
+Maker.prototype.getTemplate = function( templateName ) {
+	return clone( this.templates[templateName] );
+} // end getTemplate()
 
 
 //////////////////////////////////////////////////////////////////////////

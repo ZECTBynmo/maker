@@ -5,11 +5,11 @@ maker.loadTemplateDir( "./templates", function( templates ) {
 	// Grab the templates we want to use. We clone and create 
 	// two copies of the function template, so that 
 	// we can setup two functions 
-	var functionT = clone( templates["function"] ),
-		secondFunctionT = clone( templates["function"] ),
-		thirdFunctionT = clone( templates["function"] ),
-		constructorT = templates["constructor"],
-		writeFile = templates["writeFile"];
+	var functionT = maker.getTemplate( "function"] ),
+		secondFunctionT = maker.getTemplate( "function" ),
+		thirdFunctionT = maker.getTemplate( "function" ),
+		constructorT = maker.getTemplate( "constructor" ),
+		writeFile = maker.getTemplate( "writeFile" );
 
 	// Some constants
 	var className = "TestClass";
