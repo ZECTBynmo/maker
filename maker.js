@@ -169,7 +169,9 @@ function parseTemplate( templateString, separationString ) {
 	while( iPosition > 0 ) {
 		matches.push( iPosition );
 
-		iPosition = templateString.indexOf( separationString, iPosition+1 );
+		var newPosition = templateString.indexOf( separationString, iPosition+separationString.length );
+
+		iPosition = newPosition;
 	}
 
 	if( matches.length % 2 != 0 ) {
