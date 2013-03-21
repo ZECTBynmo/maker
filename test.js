@@ -5,7 +5,7 @@ maker.loadTemplateDir( "./templates", function( templates ) {
 	// Grab the templates we want to use. We clone and create 
 	// two copies of the function template, so that 
 	// we can setup two functions 
-	var functionT = maker.getTemplate( "function"] ),
+	var functionT = maker.getTemplate( "function" ),
 		secondFunctionT = maker.getTemplate( "function" ),
 		thirdFunctionT = maker.getTemplate( "function" ),
 		constructorT = maker.getTemplate( "constructor" ),
