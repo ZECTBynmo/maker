@@ -71,7 +71,7 @@ Maker.prototype.getTemplate = function( templateName ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Creates a file on disk composed of the given templates
-Maker.prototype.makeFile = function( path, templates ) {
+Maker.prototype.makeFile = function( path, templates, callback ) {
 	// Convert any templates that are still objects into strings
 	for( var iTemplate=0; iTemplate<templates.length; ++iTemplate ) {
 		if( typeof(templates[iTemplate]) === "object" ) {
@@ -98,6 +98,9 @@ Maker.prototype.makeFile = function( path, templates ) {
 	    } else {
 	        console.log("The file was saved!");
 	    }
+
+	    if( callback != undefined ) 
+	    	callback( err );
 	}); 
 } // end makeFile()
 
