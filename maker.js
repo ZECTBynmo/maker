@@ -54,7 +54,7 @@ Maker.prototype.template = function( templateString, contents ) {
 	for( var property in contents ) {
 		if( contents.hasOwnProperty(property) ) {
 
-			templateObj[property] = contents[property] || {};
+			templateObj[property] = contents[property] || undefined;
 		}
 	}
 
@@ -67,6 +67,22 @@ Maker.prototype.template = function( templateString, contents ) {
 Maker.prototype.getTemplate = function( templateName ) {
 	return clone( this.templates[templateName] );
 } // end getTemplate()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Returns a template filled with the contents given
+Maker.prototype.fillTemplate = function( templateName, contents ) {
+	var templateObj = clone( this.templates[templateName] );
+
+	for( var property in contents ) {
+		if( contents.hasOwnProperty(property) ) {
+
+			templateObj[property] = contents[property] || undefined;
+		}
+	}
+
+	return templateObj;
+} // end fillTemplate()
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -119,7 +135,12 @@ Maker.prototype.renderTemplateToString = function( template ) {
 		if( iItem == "__fullTemplateString__" || iItem == "__templateMatches__" )
 			continue;
 
-		if( typeof template[iItem] === "object" ) {
+		//console.log("item " + iItem + " is of type " + typeof iItem + " with value " + template[iItem] );
+
+		if( typeof template[iItem] == "undefined" || template[iItem] == "undefined" ) {
+			template[iItem] = "";
+			console.log( "Item '" + iItem + "' is undefined" );
+		} else if( typeof template[iItem] === "object" ) {
 			// Render this template recursively
 			template[iItem] = this.renderTemplateToString( template[iItem] );
 		} else if( typeof template[iItem] != "string" ) {
@@ -190,7 +211,7 @@ function parseTemplate( templateString, separationString ) {
 	for( var iItem = 0; iItem < matches.length; iItem += 2 ) {
 		var strItem = templateString.substring( matches[iItem] + separationString.length, matches[iItem+1] );
 		
-		templateObj[strItem] = {};
+		templateObj[strItem] = undefined;
 	}
 
 	// Attach the original template string onto the parsed template object, so that
