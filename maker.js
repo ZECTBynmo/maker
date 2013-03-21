@@ -30,6 +30,7 @@ var log = function( text, isImportant ) {
 
 var wrench = require("wrench"),
 	basename = require("path").basename,
+	pathModule = require("path"),
 	fs = require("fs"),
 	clone = require("clone"),
 	traverse = require("traverse");
@@ -84,6 +85,11 @@ Maker.prototype.makeFile = function( path, templates ) {
 	for( var iTemplate=0; iTemplate<templates.length; ++iTemplate ) {
 		fileContents += templates[iTemplate];
 	}
+
+	var folderPath = pathModule.dirname( path );
+
+	// Create the directory if it didn't exist already
+	wrench.mkdirSyncRecursive( folderPath );
 
 	// Write the file to disk
 	fs.writeFile( path, fileContents, function(err) {
