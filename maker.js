@@ -33,6 +33,7 @@ var wrench = require("wrench"),
 	pathModule = require("path"),
 	fs = require("fs"),
 	clone = require("clone"),
+	async = require("async"),
 	traverse = require("traverse");
 
 var templateFileExtension = ".tpl";
@@ -63,6 +64,30 @@ Maker.prototype.template = function( templateString, contents ) {
 
 
 //////////////////////////////////////////////////////////////////////////
+// Retrurns a template object created by processing a file on disk
+Maker.prototype.makeTemplate = function( filePath, templateParams ) {
+	
+	var file = fs.readFileSync( filePath, "utf8" );
+
+	// Replace all instances of given strings with the given template 
+	// parameter string within the file
+	for( var iParam in templateParams ) {
+		if( templateParams.hasOwnProperty(iParam) ) {
+			var templateParamString = this.separationString + templateParams[iParam] + this.separationString;
+			file = file.replace( new RegExp(iParam, "g"), templateParamString );
+			log( "replacing " + iParam + " with " + templateParamString );
+		}
+	}
+
+	var template = parseTemplate( file, this.separationString );
+
+	this.templates[filePath] = template
+
+	return clone( template );
+} // end makeTemplate()
+
+
+//////////////////////////////////////////////////////////////////////////
 // Returns a template
 Maker.prototype.getTemplate = function( templateName ) {
 	return clone( this.templates[templateName] );
@@ -71,8 +96,13 @@ Maker.prototype.getTemplate = function( templateName ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Returns a template filled with the contents given
-Maker.prototype.fillTemplate = function( templateName, contents ) {
-	var templateObj = clone( this.templates[templateName] );
+Maker.prototype.fillTemplate = function( template, contents ) {
+	var templateObj = {};
+
+	if( typeof(template) === "string" )
+		templateObj = clone( this.templates[template] );
+	else
+		templateObj = template;
 
 	for( var property in contents ) {
 		if( contents.hasOwnProperty(property) ) {
@@ -185,6 +215,37 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 		}
 	});
 } // end loadTemplateDir()
+
+
+//////////////////////////////////////////////////////////////////////////
+// Create templates from all files within a directory, and maps their
+// filled out versions to a new location  
+Maker.prototype.makeTemplateFromDir = function( source, dest, replacementMap, contents, callback ) {
+	var _this = this; 
+	var templates = {},
+		numTemplates = 0;
+
+	// Walk the folder tree recursively
+	wrench.readdirRecursive( source, function(error, files) {
+		numTemplates += files.length;
+
+		if( files == null ) {
+			log( numTemplates + " templates created from directory " + source );
+			_this.templates = templates;
+			return callback( templates );
+		}
+
+		function iteratorFn( iFile, callback ) {
+			var path = source + "/" + files[iFile];
+
+			var template = this.makeTemplate( path, contents );
+
+			callback();
+		}
+
+		async.eachSeries( files, iteratorFn, callback );
+	});
+} // end makeTemplateFromDir()
 
 
 //////////////////////////////////////////////////////////////////////////
