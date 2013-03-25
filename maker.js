@@ -66,8 +66,12 @@ Maker.prototype.template = function( templateString, contents ) {
 //////////////////////////////////////////////////////////////////////////
 // Retrurns a template object created by processing a file on disk
 Maker.prototype.makeTemplate = function( filePath, templateParams ) {
-	
-	var file = fs.readFileSync( filePath, "utf8" );
+	try {
+		var file = fs.readFileSync( filePath, "utf8" );
+	} catch( err ) {
+		console.log( err );
+		return {};
+	}
 
 	// Replace all instances of given strings with the given template 
 	// parameter string within the file
@@ -75,7 +79,6 @@ Maker.prototype.makeTemplate = function( filePath, templateParams ) {
 		if( templateParams.hasOwnProperty(iParam) ) {
 			var templateParamString = this.separationString + templateParams[iParam] + this.separationString;
 			file = file.replace( new RegExp(iParam, "g"), templateParamString );
-			log( "replacing " + iParam + " with " + templateParamString );
 		}
 	}
 
@@ -118,6 +121,12 @@ Maker.prototype.fillTemplate = function( template, contents ) {
 //////////////////////////////////////////////////////////////////////////
 // Creates a file on disk composed of the given templates
 Maker.prototype.makeFile = function( path, templates, callback ) {
+	log( "Making file " + path );
+
+	// If this is a folder, just return
+	if( pathModule.extname(path) == "" )
+		return;
+
 	// Convert any templates that are still objects into strings
 	for( var iTemplate=0; iTemplate<templates.length; ++iTemplate ) {
 		if( typeof(templates[iTemplate]) === "object" ) {
@@ -141,8 +150,6 @@ Maker.prototype.makeFile = function( path, templates, callback ) {
 	fs.writeFile( path, fileContents, function(err) {
 	    if(err) {
 	        console.log(err);
-	    } else {
-	        console.log("The file was saved!");
 	    }
 
 	    if( callback != undefined ) 
@@ -152,7 +159,7 @@ Maker.prototype.makeFile = function( path, templates, callback ) {
 
 
 //////////////////////////////////////////////////////////////////////////
-// Renders a template and its contents back into a string
+// Renders a template recursively back into a string
 Maker.prototype.renderTemplateToString = function( template ) {
 	if( typeof(template) === "string" )
 		template = this.templates[template];
@@ -178,7 +185,12 @@ Maker.prototype.renderTemplateToString = function( template ) {
 		} 
 
 		var stringToReplace = this.separationString + iItem + this.separationString;
-		renderedTemplate = renderedTemplate.replace( new RegExp(stringToReplace, "g"), template[iItem] );
+
+		try {
+			renderedTemplate = renderedTemplate.replace( new RegExp(stringToReplace, "g"), template[iItem] );
+		} catch( err ) {
+			console.log( "renderTemplate: " + err );
+		}		
 	}
 
 	return renderedTemplate;
@@ -220,32 +232,106 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 //////////////////////////////////////////////////////////////////////////
 // Create templates from all files within a directory, and maps their
 // filled out versions to a new location  
-Maker.prototype.makeTemplateFromDir = function( source, dest, replacementMap, contents, callback ) {
-	var _this = this; 
-	var templates = {},
-		numTemplates = 0;
+Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, pathReplacementMap, extensions, contents, callback ) {
+	log( "Making directory " + source + " into templates and outputting to " + dest, true );
+
+	// Make the pathReplacementMap, extensions, and contents arguments optional
+	if( arguments.length == 4 ) {
+		callback = extensions;
+		pathReplacementMap = {};
+		extensions = [];
+		contents = {};
+	} else if( arguments.length == 5 ) {
+		callback = contents;
+		contents = {};
+		extensions = [];
+	} else if( arguments.length == 6 ) {
+		callback = contents;
+		contents = {};
+	}
+
+	if( extensions.length > 0 ) {
+		log( "Only templating files with extensions: " + extensions );
+	} else {
+		log( "Not filtering for extensions" );
+		log( arguments );
+	}
+
+	var _this = this,
+		templates = {},
+		numTemplates = 0,
+		finishedReading = false,
+		finishedTemplating = false;
 
 	// Walk the folder tree recursively
 	wrench.readdirRecursive( source, function(error, files) {
-		numTemplates += files.length;
+		if( files != undefined )
+			numTemplates += files.length;
 
 		if( files == null ) {
-			log( numTemplates + " templates created from directory " + source );
+			log( numTemplates + " files inspected within directory " + source );
 			_this.templates = templates;
-			return callback( templates );
+
+			finishedReading = true;
+
+			// We have a race condition between reading and templating,
+			// so we want to make sure both are finished before calling callback()
+			if( finishedTemplating && finishedReading ) {
+				callback();
+			}
 		}
 
-		function iteratorFn( iFile, callback ) {
-			var path = source + "/" + files[iFile];
+		function iteratorFn( file, finishedCB ) {
+			// Make sure this file has a file extension we care about
+			//
+			// NOTE: extension filtering is optional, so if extensions is an
+			// empty array, any file extension will be let through
+			var hasValidExtension = extensions.length > 0 ? false : true;
+			for( var iExtension = 0; iExtension < extensions.length; ++iExtension ) {
+				if( pathModule.extname(file) == extensions[iExtension] )
+					hasValidExtension = true;
+			}
 
-			var template = this.makeTemplate( path, contents );
+			// Give up on this round if this file has an invalid extension
+			if( !hasValidExtension )
+				return finishedCB();
 
-			callback();
+			var path = source + "/" + file;
+
+			var templateObj = _this.makeTemplate( path, replacementMap );
+
+			// Copy over the parameters we're trying to fill in
+			for( var property in contents ) {
+				if( contents.hasOwnProperty(property) ) {
+					templateObj[property] = contents[property] || undefined;
+				}
+			}
+
+			// Use the path replacement map to modify output locations
+			var outputPath = dest + file;
+			for( var iItem in pathReplacementMap ) {
+				if( pathReplacementMap.hasOwnProperty(iItem) ) {
+					outputPath = outputPath.replace( new RegExp(iItem, "g"), pathReplacementMap[iItem] );
+				}
+			}
+
+			_this.makeFile( outputPath, [templateObj], finishedCB );
 		}
 
-		async.eachSeries( files, iteratorFn, callback );
+		function asyncCallback( error, results ) {
+			finishedTemplating = true;
+
+			// We have a race condition between reading and templating,
+			// so we want to make sure both are finished before calling callback()
+			if( finishedTemplating && finishedReading ) {
+				callback();
+			}
+		}
+
+		if( files != null )
+			async.eachSeries( files, iteratorFn, asyncCallback );
 	});
-} // end makeTemplateFromDir()
+} // end makeTemplatesFromDir()
 
 
 //////////////////////////////////////////////////////////////////////////
