@@ -28,13 +28,13 @@ var log = function( text, isImportant ) {
 	}
 };
 
-var wrench = require("wrench"),
+var pathModule = require("path"),
 	basename = require("path").basename,
-	pathModule = require("path"),
-	fs = require("fs"),
+	traverse = require("traverse"),
+	wrench = require("wrench"),
 	clone = require("clone"),
 	async = require("async"),
-	traverse = require("traverse");
+	fs = require("fs");
 
 var templateFileExtension = ".tpl";
 
