@@ -345,7 +345,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		}
 
 		if( files != null )
-			async.eachSeries( files, iteratorFn, asyncCallback );
+			async.forEachSeries( files, iteratorFn, asyncCallback );
 	});
 } // end makeTemplatesFromDir()
 
