@@ -64,6 +64,22 @@ Maker.prototype.template = function( templateString, contents ) {
 
 
 //////////////////////////////////////////////////////////////////////////
+// Returns an array of the template params within a template string
+Maker.prototype.getTemplateParams = function( templateString, contents ) {
+	var templateObj = parseTemplate( templateString, this.separationString ),
+		params = [];
+
+	for( var property in templateObj ) {
+		if( templateObj.hasOwnProperty(property) && property != "__fullTemplateString__" && property != "__templateMatches__" ) {
+			params.push( property );
+		}
+	}
+
+	return params;
+} // end getTemplateParams()
+
+
+//////////////////////////////////////////////////////////////////////////
 // Retrurns a template object created by processing a file on disk
 Maker.prototype.makeTemplate = function( filePath, templateParams ) {
 	try {
