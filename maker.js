@@ -65,9 +65,16 @@ Maker.prototype.template = function( templateString, contents ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Returns an array of the template params within a template string
-Maker.prototype.getTemplateParams = function( templateString, contents ) {
-	var templateObj = parseTemplate( templateString, this.separationString ),
-		params = [];
+Maker.prototype.getTemplateParams = function( template, contents ) {
+	var templateObj = {};
+
+	if( typeof(template) == "string" ) {
+		templateObj = parseTemplate( template, this.separationString );
+	} else if( typeof(template) == "object" ) {
+		templateObj = template;
+	}
+
+	var params = [];
 
 	for( var property in templateObj ) {
 		if( templateObj.hasOwnProperty(property) && property != "__fullTemplateString__" && property != "__templateMatches__" ) {
