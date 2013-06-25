@@ -248,6 +248,8 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 
 			templates[templateName] = _this.template( file );
 		}
+
+		callback();
 	});
 } // end loadTemplateDir()
 
