@@ -12,7 +12,7 @@
 */
 //////////////////////////////////////////////////////////////////////////
 // Node.js Exports
-exports.createMaker = function( separationString ) { return new Maker(separationString); }
+exports.createMaker = function( separationString, defaultPropertyValue ) { return new Maker(separationString, defaultPropertyValue); }
 
 //////////////////////////////////////////////////////////////////////////
 // Namespace (lol)
@@ -20,9 +20,9 @@ var DEBUG = true;
 
 var log = function( text, isImportant ) { 
 	if(DEBUG && isImportant) {
-		console.log("\n******************************************")
-		console.log("* " + text)
-		console.log("******************************************\n")
+		console.log("\n******************************************");
+		console.log("* " + text);
+		console.log("******************************************\n");
 	} else if(DEBUG) {
 		console.log(text); 
 	}
@@ -41,9 +41,10 @@ var templateFileExtension = ".tpl";
 
 //////////////////////////////////////////////////////////////////////////
 // Constructor
-function Maker( separationString ) {
+function Maker( separationString, defaultPropertyValue ) {
 	this.separationString = separationString || "~~";
-	this.templates = {};
+	this.templates = {},
+	this.defaultPropertyValue = defaultPropertyValue;
 } // end Maker()
 
 
@@ -226,31 +227,31 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 	var _this = this; 
 	var templates = {};
 
-	// Walk the folder tree recursively
-	wrench.readdirRecursive( templateDir, function(error, files) {
-		if( files == null ) {
-			log( "Templates loaded from directory " + templateDir );
-			_this.templates = templates;
-			return callback( templates );
-		}
+	var files = wrench.readdirSyncRecursive( templateDir );
 
-		for( var iFile=0; iFile<files.length; ++iFile ) {
-			if( files[iFile].indexOf(".tpl") == -1 )
-				continue;
+	if( files == null ) {
+		log( "Templates loaded from directory " + templateDir );
+		_this.templates = templates;
+		return callback( templates );
+	}
 
-			var path = templateDir + "/" + files[iFile],
-				file = fs.readFileSync( path, "utf8" );
+	for( var iFile=0; iFile<files.length; ++iFile ) {
+		if( files[iFile].indexOf(".tpl") == -1 )
+			continue;
 
-			var templateName = basename( path );
+		var path = templateDir + "/" + files[iFile],
+			file = fs.readFileSync( path, "utf8" );
 
-			// Trim off the extension
-			templateName = templateName.substring( 0, templateName.length - templateFileExtension.length );
+		var templateName = basename( path );
 
-			templates[templateName] = _this.template( file );
-		}
+		// Trim off the extension
+		templateName = templateName.substring( 0, templateName.length - templateFileExtension.length );
 
-		callback();
-	});
+		templates[templateName] = _this.template( file );
+	}
+
+	callback();
+
 } // end loadTemplateDir()
 
 
@@ -383,7 +384,7 @@ function parseTemplate( templateString, separationString ) {
 	for( var iItem = 0; iItem < matches.length; iItem += 2 ) {
 		var strItem = templateString.substring( matches[iItem] + separationString.length, matches[iItem+1] );
 		
-		templateObj[strItem] = undefined;
+		templateObj[strItem] = this.defaultPropertyValue;
 	}
 
 	// Attach the original template string onto the parsed template object, so that
