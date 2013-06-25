@@ -229,12 +229,6 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 
 	var files = wrench.readdirSyncRecursive( templateDir );
 
-	if( files == null ) {
-		log( "Templates loaded from directory " + templateDir );
-		_this.templates = templates;
-		return callback( templates );
-	}
-
 	for( var iFile=0; iFile<files.length; ++iFile ) {
 		if( files[iFile].indexOf(".tpl") == -1 )
 			continue;
@@ -250,7 +244,11 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 		templates[templateName] = _this.template( file );
 	}
 
-	callback();
+	log( "Templates loaded from directory " + templateDir );
+
+	_this.templates = templates;
+
+	callback( templates );
 
 } // end loadTemplateDir()
 
