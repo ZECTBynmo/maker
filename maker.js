@@ -287,74 +287,75 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		finishedReading = false,
 		finishedTemplating = false;
 
-	// Walk the folder tree recursively
-	wrench.readdirRecursive( source, function(error, files) {
-		if( files != undefined )
-			numTemplates += files.length;
+	var files = wrench.readdirSyncRecursive( source );
 
-		if( files == null ) {
-			log( numTemplates + " files inspected within directory " + source );
-			_this.templates = templates;
+	// Walk the folder tree recursively\
+	if( files != undefined )
+		numTemplates += files.length;
 
-			finishedReading = true;
+	if( files == null ) {
+		log( numTemplates + " files inspected within directory " + source );
+		_this.templates = templates;
 
-			// We have a race condition between reading and templating,
-			// so we want to make sure both are finished before calling callback()
-			if( finishedTemplating && finishedReading ) {
-				callback();
+		finishedReading = true;
+
+		// We have a race condition between reading and templating,
+		// so we want to make sure both are finished before calling callback()
+		if( finishedTemplating && finishedReading ) {
+			callback();
+		}
+	}
+
+	function iteratorFn( file, finishedCB ) {
+		// Make sure this file has a file extension we care about
+		//
+		// NOTE: extension filtering is optional, so if extensions is an
+		// empty array, any file extension will be let through
+		var hasValidExtension = extensions.length > 0 ? false : true;
+		for( var iExtension = 0; iExtension < extensions.length; ++iExtension ) {
+			if( pathModule.extname(file) == extensions[iExtension] )
+				hasValidExtension = true;
+		}
+
+		// Give up on this round if this file has an invalid extension
+		if( !hasValidExtension )
+			return finishedCB();
+
+		var path = source + "/" + file;
+
+		var templateObj = _this.makeTemplate( path, replacementMap );
+
+		// Copy over the parameters we're trying to fill in
+		for( var property in contents ) {
+			if( contents.hasOwnProperty(property) ) {
+				templateObj[property] = contents[property] || undefined;
 			}
 		}
 
-		function iteratorFn( file, finishedCB ) {
-			// Make sure this file has a file extension we care about
-			//
-			// NOTE: extension filtering is optional, so if extensions is an
-			// empty array, any file extension will be let through
-			var hasValidExtension = extensions.length > 0 ? false : true;
-			for( var iExtension = 0; iExtension < extensions.length; ++iExtension ) {
-				if( pathModule.extname(file) == extensions[iExtension] )
-					hasValidExtension = true;
-			}
-
-			// Give up on this round if this file has an invalid extension
-			if( !hasValidExtension )
-				return finishedCB();
-
-			var path = source + "/" + file;
-
-			var templateObj = _this.makeTemplate( path, replacementMap );
-
-			// Copy over the parameters we're trying to fill in
-			for( var property in contents ) {
-				if( contents.hasOwnProperty(property) ) {
-					templateObj[property] = contents[property] || undefined;
-				}
-			}
-
-			// Use the path replacement map to modify output locations
-			var outputPath = dest + file;
-			for( var iItem in pathReplacementMap ) {
-				if( pathReplacementMap.hasOwnProperty(iItem) ) {
-					outputPath = outputPath.replace( new RegExp(iItem, "g"), pathReplacementMap[iItem] );
-				}
-			}
-
-			_this.makeFile( outputPath, [templateObj], finishedCB );
-		}
-
-		function asyncCallback( error, results ) {
-			finishedTemplating = true;
-
-			// We have a race condition between reading and templating,
-			// so we want to make sure both are finished before calling callback()
-			if( finishedTemplating && finishedReading ) {
-				callback();
+		// Use the path replacement map to modify output locations
+		var outputPath = dest + file;
+		for( var iItem in pathReplacementMap ) {
+			if( pathReplacementMap.hasOwnProperty(iItem) ) {
+				outputPath = outputPath.replace( new RegExp(iItem, "g"), pathReplacementMap[iItem] );
 			}
 		}
 
-		if( files != null )
-			async.forEachSeries( files, iteratorFn, asyncCallback );
-	});
+		_this.makeFile( outputPath, [templateObj], finishedCB );
+	}
+
+	function asyncCallback( error, results ) {
+		finishedTemplating = true;
+
+		// We have a race condition between reading and templating,
+		// so we want to make sure both are finished before calling callback()
+		if( finishedTemplating && finishedReading ) {
+			callback();
+		}
+	}
+
+	if( files != null )
+		async.forEachSeries( files, iteratorFn, asyncCallback );
+
 } // end makeTemplatesFromDir()
 
 
