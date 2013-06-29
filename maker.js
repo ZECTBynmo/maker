@@ -293,18 +293,10 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 	if( files != undefined )
 		numTemplates += files.length;
 
-	if( files == null ) {
-		log( numTemplates + " files inspected within directory " + source );
-		_this.templates = templates;
+	log( numTemplates + " files inspected within directory " + source );
+	_this.templates = templates;
 
-		finishedReading = true;
-
-		// We have a race condition between reading and templating,
-		// so we want to make sure both are finished before calling callback()
-		if( finishedTemplating && finishedReading ) {
-			callback();
-		}
-	}
+	finishedReading = true;
 
 	function iteratorFn( file, finishedCB ) {
 		// Make sure this file has a file extension we care about
@@ -347,14 +339,11 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		finishedTemplating = true;
 
 		// We have a race condition between reading and templating,
-		// so we want to make sure both are finished before calling callback()
-		if( finishedTemplating && finishedReading ) {
-			callback();
-		}
+		// so we want to make sure both are finished before calling callback()	
+		callback();
 	}
 
-	if( files != null )
-		async.forEachSeries( files, iteratorFn, asyncCallback );
+	async.forEachSeries( files, iteratorFn, asyncCallback );
 
 } // end makeTemplatesFromDir()
 
