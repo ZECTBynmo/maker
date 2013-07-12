@@ -185,6 +185,10 @@ Maker.prototype.makeFile = function( path, templates, callback ) {
 //////////////////////////////////////////////////////////////////////////
 // Renders a template recursively back into a string
 Maker.prototype.renderTemplateToString = function( template ) {
+	var replaceAtIndex = function( string, start, end, replaceString ) {
+      return string.substr(0, start) + replaceString + string.substr(end);
+	}
+
 	if( typeof(template) === "string" )
 		template = this.templates[template];
 
@@ -204,17 +208,24 @@ Maker.prototype.renderTemplateToString = function( template ) {
 		} else if( typeof template[iItem] === "object" ) {
 			// Render this template recursively
 			template[iItem] = this.renderTemplateToString( template[iItem] );
+		} else if( typeof template[iItem] === "function" ) {
+			// Let functions through
 		} else if( typeof template[iItem] != "string" ) {
 			console.log( "Item '" + iItem + "' is not a string" );
 		} 
 
 		var stringToReplace = this.separationString + iItem + this.separationString;
 
-		try {
-			renderedTemplate = renderedTemplate.replace( new RegExp(stringToReplace, "g"), template[iItem] );
-		} catch( err ) {
-			console.log( "renderTemplate: " + err );
-		}		
+		for( var iItem=0; iItem<matches.length; iItem+= 2 ) {
+			var newText = "";
+
+			if( typeof(template[iItem]) == "function" )
+				newText = template[iItem]();
+			else
+				newText = template[iItem];
+
+			renderedTemplate = replaceAtIndex( renderedTemplate, matches[iItem], matches[iItem+1], newText );
+		}	
 	}
 
 	return renderedTemplate;
@@ -369,9 +380,12 @@ function parseTemplate( templateString, separationString ) {
 		log( "Error while parsing template: Mismatched separation string" );
 	}
 
+	// Pull out the name of each template parameter
 	for( var iItem = 0; iItem < matches.length; iItem += 2 ) {
 		var strItem = templateString.substring( matches[iItem] + separationString.length, matches[iItem+1] );
 		
+		// Fill out our object with whatever our default value is
+		// We'll fill this template object out with contents later
 		templateObj[strItem] = this.defaultPropertyValue;
 	}
 
