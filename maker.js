@@ -186,7 +186,7 @@ Maker.prototype.makeFile = function( path, templates, callback ) {
 // Renders a template recursively back into a string
 Maker.prototype.renderTemplateToString = function( template ) {
 	var replaceAtIndex = function( string, start, end, replaceString ) {
-      return string.substr(0, start) + replaceString + string.substr(end);
+      return string.substring(0, start) + replaceString + string.substring(end);
 	}
 
 	if( typeof(template) === "string" )
@@ -196,37 +196,19 @@ Maker.prototype.renderTemplateToString = function( template ) {
 	var renderedTemplate = template.__fullTemplateString__,
 		matches = template.__templateMatches__;
 
-	for( var iItem in template ) {
-		if( iItem == "__fullTemplateString__" || iItem == "__templateMatches__" )
-			continue;
+	for( var iMatch=matches.length-1; iMatch>0; iMatch-= 2 ) {
 
-		//console.log("item " + iItem + " is of type " + typeof iItem + " with value " + template[iItem] );
+		var thisTemplateItem = renderedTemplate.substring( matches[iMatch-1] + this.separationString.length, matches[iMatch] );
+		
+		var newText = "";
 
-		if( typeof template[iItem] == "undefined" || template[iItem] == "undefined" ) {
-			template[iItem] = "";
-			console.log( "Item '" + iItem + "' is undefined" );
-		} else if( typeof template[iItem] === "object" ) {
-			// Render this template recursively
-			template[iItem] = this.renderTemplateToString( template[iItem] );
-		} else if( typeof template[iItem] === "function" ) {
-			// Let functions through
-		} else if( typeof template[iItem] != "string" ) {
-			console.log( "Item '" + iItem + "' is not a string" );
-		} 
+		if( typeof(template[thisTemplateItem]) == "function" )
+			newText = template[thisTemplateItem]();
+		else
+			newText = template[thisTemplateItem];
 
-		var stringToReplace = this.separationString + iItem + this.separationString;
-
-		for( var iItem=0; iItem<matches.length; iItem+= 2 ) {
-			var newText = "";
-
-			if( typeof(template[iItem]) == "function" )
-				newText = template[iItem]();
-			else
-				newText = template[iItem];
-
-			renderedTemplate = replaceAtIndex( renderedTemplate, matches[iItem], matches[iItem+1], newText );
-		}	
-	}
+		renderedTemplate = replaceAtIndex( renderedTemplate, matches[iMatch-1], matches[iMatch]+this.separationString.length, newText );
+	}	
 
 	return renderedTemplate;
 } // end renderTemplate()
