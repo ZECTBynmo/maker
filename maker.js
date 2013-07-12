@@ -204,6 +204,8 @@ Maker.prototype.renderTemplateToString = function( template ) {
 
 		if( typeof(template[thisTemplateItem]) == "function" )
 			newText = template[thisTemplateItem]();
+		else if( typeof(template[thisTemplateItem]) == "object" )
+			newText = this.renderTemplateToString( template[thisTemplateItem] );
 		else
 			newText = template[thisTemplateItem];
 
