@@ -101,8 +101,9 @@ Maker.prototype.makeTemplate = function( filePath, templateParams ) {
 	// parameter string within the file
 	for( var iParam in templateParams ) {
 		if( templateParams.hasOwnProperty(iParam) ) {
-			var templateParamString = this.separationString + templateParams[iParam] + this.separationString;
-			file = file.replace( new RegExp(iParam, "g"), templateParamString );
+
+			var templateParamString = this.separationString + iParam + this.separationString;
+			file = file.replace( new RegExp(templateParams[iParam], "g"), templateParamString );
 		}
 	}
 
@@ -323,7 +324,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		var outputPath = dest + file;
 		for( var iItem in pathReplacementMap ) {
 			if( pathReplacementMap.hasOwnProperty(iItem) ) {
-				outputPath = outputPath.replace( new RegExp(iItem, "g"), pathReplacementMap[iItem] );
+				outputPath = outputPath.replace( new RegExp(pathReplacementMap[iItem], "g"), iItem );
 			}
 		}
 
@@ -373,8 +374,8 @@ function parseTemplate( templateString, separationString ) {
 		templateObj[strItem] = this.defaultPropertyValue;
 	}
 
-	// Attach the original template string onto the parsed template object, so that
-	// we can reconstruct it later
+	// Attach the original template string onto the parsed template 
+	// object, so that we can reconstruct it later
 	templateObj.__fullTemplateString__= templateString;
 	templateObj.__templateMatches__ = matches;
 
