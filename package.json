@@ -1,6 +1,6 @@
 {
   "name": "maker",
-  "version": "0.0.14",
+  "version": "0.1.0",
   "author": "Mike Vegeto <michael.vegeto@gmail.com>",
   "description": "Generates files from various templates and inputs",
   "main": "./maker",
