@@ -274,7 +274,6 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		log( "Only templating files with extensions: " + extensions );
 	} else {
 		log( "Not filtering for extensions" );
-		log( arguments );
 	}
 
 	var _this = this,
