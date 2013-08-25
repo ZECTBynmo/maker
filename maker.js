@@ -271,7 +271,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 	}
 
 	if( extensions.length > 0 ) {
-		log( "Only templating files with extensions: " + extensions );
+		log( "Filtering files with extensions: " + extensions );
 	} else {
 		log( "Not filtering for extensions" );
 	}
@@ -294,21 +294,32 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 	finishedReading = true;
 
 	function iteratorFn( file, finishedCB ) {
+		// We don't support templating files with no extension for now
+		if( pathModule.extname(file) == "" )
+			return finishedCB();
+
 		// Make sure this file has a file extension we care about
 		//
 		// NOTE: extension filtering is optional, so if extensions is an
 		// empty array, any file extension will be let through
 		var hasValidExtension = extensions.length > 0 ? false : true;
 		for( var iExtension = 0; iExtension < extensions.length; ++iExtension ) {
+			var extensionFilter = extensions[iExtension];
+
 			// Figure out whether we're trying to include or exclude this extension
 			var isExclude = false;
-			if( extensions[iExtension][0] == "-" ) {
+			if( extensionFilter.charCodeAt(0) == 45 || extensionFilter.charCodeAt(0) == 46 ) {
 				isExclude = true;
-				extensions[iExtension] = extensions[iExtension].substring(1);
+				extensionFilter = extensionFilter.substring(1);
 			}
 
-			if( pathModule.extname(file) == extensions[iExtension] )
-				hasValidExtension = !isExclude;
+			if( isExclude ) {
+				if( pathModule.extname(file) != extensionFilter )
+					hasValidExtension = true;
+			} else {
+				if( pathModule.extname(file) == extensionFilter )
+					hasValidExtension = true;
+			}
 		}
 
 		// Give up on this round if this file has an invalid extension
