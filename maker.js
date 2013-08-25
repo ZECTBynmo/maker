@@ -300,8 +300,15 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		// empty array, any file extension will be let through
 		var hasValidExtension = extensions.length > 0 ? false : true;
 		for( var iExtension = 0; iExtension < extensions.length; ++iExtension ) {
+			// Figure out whether we're trying to include or exclude this extension
+			var isExclude = false;
+			if( extensions[iExtension][0] == "-" ) {
+				isExclude = true;
+				extensions[iExtension] = extensions[iExtension].substring(1);
+			}
+
 			if( pathModule.extname(file) == extensions[iExtension] )
-				hasValidExtension = true;
+				hasValidExtension = !isExclude;
 		}
 
 		// Give up on this round if this file has an invalid extension
