@@ -1,3 +1,5 @@
+# maker
+
 maker is a general purpose text file templating engine. Use it to create text files programmatically.
 
 Installation
