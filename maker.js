@@ -308,7 +308,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 
 			// Figure out whether we're trying to include or exclude this extension
 			var isExclude = false;
-			if( extensionFilter.charCodeAt(0) == 45 || extensionFilter.charCodeAt(0) == 46 ) {
+			if( extensionFilter.charCodeAt(0) == 45 ) {
 				isExclude = true;
 				extensionFilter = extensionFilter.substring(1);
 			}
@@ -325,7 +325,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		// Give up on this round if this file has an invalid extension
 		if( !hasValidExtension )
 			return finishedCB();
-
+	
 		var path = source + "/" + file;
 
 		var templateObj = _this.makeTemplate( path, replacementMap );
