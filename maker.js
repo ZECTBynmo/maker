@@ -370,12 +370,35 @@ function parseTemplate( templateString, separationString ) {
 		matches = [],
 		templateObj = {};
 
+	// Find the first separation string inside the template string
 	iPosition = templateString.indexOf( separationString, iPosition );
 
 	while( iPosition > 0 ) {
+		// If this is the first of a pair of separation string matches, and we can 
+		// advance less than the length of the separation string and find a match, 
+		// advance to that point. This well help avoid this situation:
+		// ex: "~~~first~~" will become ~[~~first~~]
+		var repeatStringOffset = 0;
+		if( matches.length % 2 == 0 ) {
+			for( var iTestPos=1; iTestPos<separationString.length; ++iTestPos ) {
+				var testPos = templateString.indexOf( separationString, iPosition + iTestPos );
+
+				if( testPos == newPosition + iTestPos )
+					repeatStringOffset = iTestPos;
+			}
+		}
+
+		iPosition+= repeatStringOffset;
+
 		matches.push( iPosition );
 
-		var newPosition = templateString.indexOf( separationString, iPosition+separationString.length );
+		// Move the position by the length of the separation string, because
+		// we don't want to cause an error if there are two separation strings
+		// in a row, eg:  "~~first~~~~second~~""
+		// will become: [~~first~~][~~second~~]
+		iPosition+= separationString.length;
+
+		var newPosition = templateString.indexOf( separationString, iPosition );
 
 		iPosition = newPosition;
 	}
