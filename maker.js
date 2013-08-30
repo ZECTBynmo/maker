@@ -88,7 +88,7 @@ Maker.prototype.getTemplateParams = function( template, contents ) {
 
 
 //////////////////////////////////////////////////////////////////////////
-// Retrurns a template object created by processing a file on disk
+// Returns a template object created by processing a file on disk
 Maker.prototype.makeTemplate = function( filePath, templateParams ) {
 	try {
 		var file = fs.readFileSync( filePath, "utf8" );
