@@ -255,6 +255,8 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, pathReplacementMap, extensions, contents, callback ) {
 	log( "Making directory " + source + " into templates and outputting to " + dest, true );
 
+	dest+= "/";
+
 	// Make the pathReplacementMap, extensions, and contents arguments optional
 	if( arguments.length == 4 ) {
 		callback = extensions;
