@@ -6,12 +6,12 @@ var testSourcePath = __dirname + "/test_module.js",
 
 describe('#maker', function() {
 
-//	it('should templatize a file', function(done) {		
-//		var templateObj = maker.makeTemplate( testSourcePath );
-//		maker.makeFile( __dirname + "/output.js", [templateObj], function(err) {
-//			done(err);
-//		});
-//	});
+	it('should templatize a file', function(done) {		
+		var templateObj = maker.makeTemplate( testSourcePath );
+		maker.makeFile( __dirname + "/output/output.js", [templateObj], function(err) {
+			done(err);
+		});
+	});
 
 
 	it('should templatize a file', function(done) {		
@@ -30,18 +30,16 @@ describe('#maker', function() {
 				done(err);
 			}
 
-			console.log( output.first() );
-			console.log( output.second() );
-			console.log( output.third() );
-			console.log( output.fourth() );
-
 			if( output.first() != contents.testWord )
 				done( "Failed to templatize raw string" );
 			if( output.second() != "~" + contents.testWord )
 				done( "Failed to templatize string with separation string before it" );
-			if( output.second() != contents.testWord + "~" )
+			if( output.third() != contents.testWord + "~" )
 				done( "Failed to templatize string with separation string after it" );
-			if( output.second() != "~" + contents.testWord + "~" )
+
+			var shouldBe = "~" + contents.testWord + "~";
+
+			if( output.fourth() != shouldBe )
 				done( "Failed to templatize string with separation string on either side" );
 
 			done();
