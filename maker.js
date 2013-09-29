@@ -383,7 +383,7 @@ function parseTemplate( templateString, separationString ) {
 	// Find the first separation string inside the template string
 	iPosition = templateString.indexOf( separationString, iPosition );
 
-	while( iPosition > 0 ) {
+	while( iPosition >= 0 ) {
 		// If this is the first of a pair of separation string matches, and we can 
 		// advance less than the length of the separation string and find a match, 
 		// advance to that point. This well help avoid this situation:
