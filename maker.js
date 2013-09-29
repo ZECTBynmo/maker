@@ -331,6 +331,10 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 	
 		var path = source + "/" + file;
 
+		// If this path has a valid extension, but is actually a folder, skip it
+		if( fs.lstatSync(path).isDirectory() )
+			return finishedCB();
+
 		// If this is a binary file, we're not going to be able to do
 		// anything anyway, so just get out
 		if( isBinary(path) )
