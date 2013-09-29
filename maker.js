@@ -30,6 +30,7 @@ var log = function( text, isImportant ) {
 
 var pathModule = require("path"),
 	basename = require("path").basename,
+	isBinary = require("isbinaryfile"),
 	traverse = require("traverse"),
 	wrench = require("wrench"),
 	clone = require("clone"),
@@ -329,6 +330,11 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 			return finishedCB();
 	
 		var path = source + "/" + file;
+
+		// If this is a binary file, we're not going to be able to do
+		// anything anyway, so just get out
+		if( isBinary(path) )
+			return finishedCB();
 
 		var templateObj = _this.makeTemplate( path, replacementMap );
 

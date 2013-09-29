@@ -1,6 +1,6 @@
 {
   "name": "maker",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Mike Vegeto <michael.vegeto@gmail.com>",
   "description": "Generates files from various templates and inputs",
   "main": "./maker",
@@ -28,6 +28,7 @@
   "dependencies": {
     "wrench": "~1.4.4",
     "traverse": "~0.6.3",
-    "clone": "~0.1.6"
+    "clone": "~0.1.6",
+    "isbinaryfile": "~0.1.9"
   }
 }
