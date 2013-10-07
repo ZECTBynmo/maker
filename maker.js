@@ -352,9 +352,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		// Use the path replacement map to modify output locations
 		var outputPath = dest + file;
 		for( var iItem in pathReplacementMap ) {
-			if( pathReplacementMap.hasOwnProperty(iItem) ) {
-				outputPath = outputPath.replace( new RegExp(pathReplacementMap[iItem], "g"), iItem );
-			}
+			outputPath = outputPath.replace( new RegExp(iItem, "g"), pathReplacementMap[iItem] );
 		}
 
 		_this.makeFile( outputPath, [templateObj], finishedCB );
