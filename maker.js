@@ -298,7 +298,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 
 	function iteratorFn( file, finishedCB ) {
 		// We don't support templating files with no extension for now
-		if( pathModule.extname(file) == "" && file[0] != "." )
+		if( pathModule.extname(file) == "" )
 			return finishedCB();
 
 		// Make sure this file has a file extension we care about
