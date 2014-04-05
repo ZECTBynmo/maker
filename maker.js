@@ -8,7 +8,7 @@
                                                     Object Structures
 -------------------------------------------------------------------------
 
-	
+
 */
 //////////////////////////////////////////////////////////////////////////
 // Node.js Exports
@@ -18,13 +18,13 @@ exports.createMaker = function( separationString, defaultPropertyValue ) { retur
 // Namespace (lol)
 var DEBUG = true;
 
-var log = function( text, isImportant ) { 
+var log = function( text, isImportant ) {
 	if(DEBUG && isImportant) {
 		console.log("\n******************************************");
 		console.log("* " + text);
 		console.log("******************************************\n");
 	} else if(DEBUG) {
-		console.log(text); 
+		console.log(text);
 	}
 };
 
@@ -98,7 +98,7 @@ Maker.prototype.makeTemplate = function( filePath, templateParams ) {
 		return {};
 	}
 
-	// Replace all instances of given strings with the given template 
+	// Replace all instances of given strings with the given template
 	// parameter string within the file
 	for( var iParam in templateParams ) {
 		if( templateParams.hasOwnProperty(iParam) ) {
@@ -149,10 +149,6 @@ Maker.prototype.fillTemplate = function( template, contents ) {
 Maker.prototype.makeFile = function( path, templates, callback ) {
 	log( "Making file " + path );
 
-	// If this is a folder, just return
-	if( pathModule.extname(path) == "" )
-		return;
-
 	// Convert any templates that are still objects into strings
 	for( var iTemplate=0; iTemplate<templates.length; ++iTemplate ) {
 		if( typeof(templates[iTemplate]) === "object" ) {
@@ -178,9 +174,9 @@ Maker.prototype.makeFile = function( path, templates, callback ) {
 	        console.log(err);
 	    }
 
-	    if( callback != undefined ) 
+	    if( callback != undefined )
 	    	callback( err );
-	}); 
+	});
 } // end makeFile()
 
 
@@ -201,7 +197,7 @@ Maker.prototype.renderTemplateToString = function( template ) {
 	for( var iMatch=matches.length-1; iMatch>0; iMatch-= 2 ) {
 
 		var thisTemplateItem = renderedTemplate.substring( matches[iMatch-1] + this.separationString.length, matches[iMatch] );
-		
+
 		var newText = "";
 
 		if( typeof(template[thisTemplateItem]) == "function" )
@@ -212,16 +208,16 @@ Maker.prototype.renderTemplateToString = function( template ) {
 			newText = template[thisTemplateItem];
 
 		renderedTemplate = replaceAtIndex( renderedTemplate, matches[iMatch-1], matches[iMatch]+this.separationString.length, newText );
-	}	
+	}
 
 	return renderedTemplate;
 } // end renderTemplate()
 
 
 //////////////////////////////////////////////////////////////////////////
-// Loads all templates inside of a given directory  
+// Loads all templates inside of a given directory
 Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
-	var _this = this; 
+	var _this = this;
 	var templates = {};
 
 	var files = wrench.readdirSyncRecursive( templateDir );
@@ -252,7 +248,7 @@ Maker.prototype.loadTemplateDir = function( templateDir, callback ) {
 
 //////////////////////////////////////////////////////////////////////////
 // Create templates from all files within a directory, and maps their
-// filled out versions to a new location  
+// filled out versions to a new location
 Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, pathReplacementMap, extensions, contents, callback ) {
 	log( "Making directory " + source + " into templates and outputting to " + dest, true );
 
@@ -297,9 +293,6 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 	finishedReading = true;
 
 	function iteratorFn( file, finishedCB ) {
-		// We don't support templating files with no extension for now
-		if( pathModule.extname(file) == "" )
-			return finishedCB();
 
 		// Make sure this file has a file extension we care about
 		//
@@ -328,7 +321,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		// Give up on this round if this file has an invalid extension
 		if( !hasValidExtension )
 			return finishedCB();
-	
+
 		var path = source + "/" + file;
 
 		// If this path has a valid extension, but is actually a folder, skip it
@@ -362,7 +355,7 @@ Maker.prototype.makeTemplatesFromDir = function( source, dest, replacementMap, p
 		finishedTemplating = true;
 
 		// We have a race condition between reading and templating,
-		// so we want to make sure both are finished before calling callback()	
+		// so we want to make sure both are finished before calling callback()
 		callback();
 	}
 
@@ -382,8 +375,8 @@ function parseTemplate( templateString, separationString ) {
 	iPosition = templateString.indexOf( separationString, iPosition );
 
 	while( iPosition >= 0 ) {
-		// If this is the first of a pair of separation string matches, and we can 
-		// advance less than the length of the separation string and find a match, 
+		// If this is the first of a pair of separation string matches, and we can
+		// advance less than the length of the separation string and find a match,
 		// advance to that point. This well help avoid this situation:
 		// ex: "~~~first~~" will become ~[~~first~~]
 		var repeatStringOffset = 0;
@@ -418,13 +411,13 @@ function parseTemplate( templateString, separationString ) {
 	// Pull out the name of each template parameter
 	for( var iItem = 0; iItem < matches.length; iItem += 2 ) {
 		var strItem = templateString.substring( matches[iItem] + separationString.length, matches[iItem+1] );
-		
+
 		// Fill out our object with whatever our default value is
 		// We'll fill this template object out with contents later
 		templateObj[strItem] = this.defaultPropertyValue;
 	}
 
-	// Attach the original template string onto the parsed template 
+	// Attach the original template string onto the parsed template
 	// object, so that we can reconstruct it later
 	templateObj.__fullTemplateString__= templateString;
 	templateObj.__templateMatches__ = matches;
